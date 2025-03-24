@@ -1,25 +1,22 @@
-# Lab 7 Assignment: Difference in Means and ANOVA
-# The University of Texas at San Antonio
-# URP-5393: Urban Planning Methods II
+---
+title: "Lab_7"
+author: "Yuan Ping"
+date: "2025-03-24"
+output: html_document
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-#---- Instructions ----
+1.1 load the same household data used in the Lab7_Script.R file, create the object `HTS`
 
-# 1. [70 points] Open the R file "Lab7_Assignment.R" and answer the questions bellow
-# 2. [30 points] Run a T-test and an ANOVA test in your data.
-
-
-#---- Part 1. Open the R file "Lab7_Assignment.R" and answer the questions bellow
-
-# 1.1 load the same household data used in the Lab7_Script.R file, create the object `HTS`
-```r
+```{r 1.1, echo=TRUE}
 library(data.table)
 library(foreign)
 HTS <- data.table(read.spss("datasets/HTS.household.10regions.sav",to.data.frame = T))
-```
 # 2. Recreate the same steps used in the lab to run a T-test, but instead, consider the following:
 # 2.1 Run a T-Test to show if the household income means is statistically different between households living in single family residences or not (use the whole sample). Produce two pdfs, one with an histogram pdf plot, and another with the simulated hypothesis testing plot showing where the T-statistic falls. Provide a short interpretation of your results
-
 library(ggplot2)
 names(HTS)
 
@@ -58,13 +55,15 @@ legend("topright",
        col = "red", pch = 19)
 
 dev.off()
-```
+
 # The test shows a t-statistic of -36.234 with 4353.4 degrees of freedom and a p-value less than 2.2e-16, indicating a highly statistically significant difference. The mean household income for those living in other housing types was $46.73, while for those in single family residences it was $75.38. The 95% confidence interval for the difference in means is from -30.20 to -27.10, which does not include zero, further confirming the result. 
 #Therefore, we reject the null hypothesis and conclude that households in single family residences have significantly higher average incomes compared to those in other housing types.
 
+```
 
-# 2.2 Filter the sample to select only the region of San Antonio. Prepare an T-Test to show if the household vehicle miles traveled (in natural logs - lnvmt) is statistically different between households living in neighborhoods with a job-population index (variable `jobpop`) over and under the city median (of the `jobpop` variable of course)
+\# 2.2 Filter the sample to select only the region of San Antonio. Prepare an T-Test to show if the household vehicle miles traveled (in natural logs - lnvmt) is statistically different between households living in neighborhoods with a job-population index (variable \`jobpop\`) over and under the city median (of the \`jobpop\` variable of course)
 
+```{r}
 HTS_SA<-HTS[region=="San Antonio, TX",]
 median_jobpop <- median(HTS_SA$jobpop, na.rm = TRUE)
 HTS_SA$jobpop_group <- ifelse(HTS_SA$jobpop > median_jobpop, "High Jobpop", "Low Jobpop")
@@ -88,13 +87,11 @@ legend("topright",
 
 #The results show a statistically significant difference between the two groups (t = -2.21, df = 1512.2, p = 0.028). Households in high job-population areas had a lower average lnvmt (mean = 2.99) compared to those in low job-population areas (mean = 3.10). The 95% confidence interval for the difference in means is from -0.217 to -0.013, which does not include zero, indicating that the observed difference is unlikely due to chance. 
 #These findings suggest that households living in neighborhoods with a high job-population index tend to travel fewer vehicle miles on average.
+```
 
-# 2.2 using the same data set (San Antonio sample), run an ANOVA test to see if there are significant differences 
-#between income categories and vehicle miles traveled by household. Follow the same steps used in the ANOVA exercise done in class.
-#Produce three pdfs: one checking the normality assumption of the dependent variable, a second one checking the presence of outliers, and a third one showing the Tukey (post hoc) T-tests plot.
+2.2 using the same data set (San Antonio sample), run an ANOVA test to see if there are significant differences between income categories and vehicle miles traveled by household. Follow the same steps used in the ANOVA exercise done in class. Produce three pdfs: one checking the normality assumption of the dependent variable, a second one checking the presence of outliers, and a third one showing the Tukey (post hoc) T-tests plot.
 
-#examine normality of the dependent varible
-
+```{r}
 pdf("hist_lnvmt.pdf", width = 8, height = 5)
 hist(HTS_SA$lnvmt,col = "lightblue", border = "white")
 dev.off()
@@ -105,11 +102,11 @@ ggsave("outliers.pdf",plot=last_plot(),width=8,height=5)
 HTS_SA_OUT<-boxplot(HTS_SA$lnvmt~HTS_SA$income_cat)
 outliers <- boxplot.stats(HTS_SA$lnvmt)$out
 HTS_SA[lnvmt%in%outliers,]#find outliers
+
 HTS_SA2<-HTS_SA[!lnvmt%in%outliers,]
 
 boxplot(HTS_SA$lnvmt~HTS_SA$income_cat)
 boxplot(HTS_SA2$lnvmt~HTS_SA2$income_cat)
-
 #Anova test
 bartlett.test(lnvmt ~ income_cat, data=HTS_SA2)
 fit<-aov(HTS_SA2$lnvmt~HTS_SA2$income_cat)
@@ -122,12 +119,14 @@ TukeyHSD(fit)
 
 plot(TukeyHSD(fit))
 dev.off()
-
 #The Tukey post-hoc test shows that households in the low-income group differ significantly in lnVMT compared to both middle- and high-income groups. However, there is no statistically significant difference in lnVMT between the middle- and high-income households.
+```
 
-# 2. [30 points] Run a T-test and an ANOVA test in your data.
-# T-test to explore whether mobility status is related to estimated home value
+2\. [30 points] Run a T-test and an ANOVA test in your data.
 
+T-test to explore whether mobility status is related to estimated home value
+
+```{r}
 library(data.table)
 san_mobility<-fread("D:/UTSA/digital-migration/discussion/2.11 data filter/san_antonio_bg.csv")
 library(dplyr)
@@ -155,8 +154,4 @@ TukeyHSD(fit)
 plot(TukeyHSD(fit))
 #The Tukey post-hoc test shows that many pairwise comparisons between marital status groups have statistically significant differences in estimated home values. Most confidence intervals do not cross zero, indicating that household home values vary considerably across marital status categories.
 
-
-# Bonus: [30 points] Provide an HTML file with your answers using R-Markdown.
-
-
-
+```

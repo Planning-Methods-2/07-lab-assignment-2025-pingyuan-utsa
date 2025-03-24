@@ -107,7 +107,7 @@ uza_bp<-boxplot(uza$lntpm~uza$region)
 
 outliers <- uza_bp$out
 
-uza[lntpm%in%outliers,]
+uza[lntpm%in%outliers,]#find outliers??
 uza2<-uza[!lntpm%in%outliers,]
 
 boxplot(uza$lntpm~uza$region)
@@ -127,7 +127,7 @@ fit<-aov(uza2$lntpm~uza2$region)
 summary(fit)
 
 #post-hoc test
-TukeyHSD(fit)
+TukeyHSD(fit)#find which groups has difference???
 
 plot(TukeyHSD(fit))
 
